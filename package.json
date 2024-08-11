@@ -2,7 +2,7 @@
   "name": "fileproperty",
   "displayName": "File Property",
   "description": "Displays the properties of the selected file in a tree view.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "publisher": "MetroSoft-Application",
   "icon": "resources/img/fileProperty.png",
   "repository": {
