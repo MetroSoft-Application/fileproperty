@@ -50,7 +50,25 @@ class TreeDataProvider implements vscode.TreeDataProvider<TreeItem> {
 	}
 
 	/**
-	 * ファイルの詳細情報（名前、パス、サイズ、作成日時、更新日時）を取得します。
+	 * ファイルの行数をカウントします。
+	 * @returns {number | null} - ファイルの行数。テキストファイルでない場合はnull。
+	 */
+	private countFileLines(): number | null {
+		if (!this.fileUri) {
+			return null;
+		}
+
+		try {
+			const content = fs.readFileSync(this.fileUri.fsPath, 'utf-8');
+			return content.split(/\r\n|\r|\n/).length;
+		} catch {
+			// テキストファイルでない場合
+			return null;
+		}
+	}
+
+	/**
+	 * ファイルの詳細情報（名前、パス、サイズ、作成日時、更新日時、行数）を取得します。
 	 * @returns {{label: string, value: string}[]} - ファイルの詳細情報を格納したオブジェクトの配列。
 	 */
 	private getFileDetails(): { label: string, value: string; }[] {
@@ -60,12 +78,12 @@ class TreeDataProvider implements vscode.TreeDataProvider<TreeItem> {
 
 		try {
 			const stats = fs.statSync(this.fileUri.fsPath);
-
 			const fileName = path.basename(this.fileUri.fsPath);
 			const filePath = this.fileUri.fsPath;
 			const fileSize = this.formatFileSize(stats.size);
 			const createdDate = stats.birthtime.toLocaleString();
 			const modifiedDate = stats.mtime.toLocaleString();
+			const lineCount = this.countFileLines();
 
 			this.cachedFileDetails = [
 				{ label: 'File Name', value: fileName },
@@ -74,6 +92,12 @@ class TreeDataProvider implements vscode.TreeDataProvider<TreeItem> {
 				{ label: 'Created Date', value: createdDate },
 				{ label: 'Modified Date', value: modifiedDate }
 			];
+
+			if (lineCount !== null) {
+				this.cachedFileDetails.push({ label: 'Line Count', value: lineCount.toString() });
+			} else {
+				this.cachedFileDetails.push({ label: 'Line Count', value: 'Not applicable' });
+			}
 
 		} catch (error) {
 			// エラーが発生した場合はキャッシュを使用

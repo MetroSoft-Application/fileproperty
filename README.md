@@ -1,6 +1,7 @@
 # File Property
 
 Displays the properties of the selected file in a tree view.
+![picture 0](resources\img\Sample.png)  
 
 ## Features
 

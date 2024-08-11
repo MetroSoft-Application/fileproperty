@@ -64,7 +64,24 @@ var TreeDataProvider = /** @class */ (function () {
         return "".concat(bytes.toFixed(2), " ").concat(units[unitIndex]);
     };
     /**
-     * ファイルの詳細情報（名前、パス、サイズ、作成日時、更新日時）を取得します。
+     * ファイルの行数をカウントします。
+     * @returns {number | null} - ファイルの行数。テキストファイルでない場合はnull。
+     */
+    TreeDataProvider.prototype.countFileLines = function () {
+        if (!this.fileUri) {
+            return null;
+        }
+        try {
+            var content = fs.readFileSync(this.fileUri.fsPath, 'utf-8');
+            return content.split(/\r\n|\r|\n/).length;
+        }
+        catch (_a) {
+            // テキストファイルでない場合
+            return null;
+        }
+    };
+    /**
+     * ファイルの詳細情報（名前、パス、サイズ、作成日時、更新日時、行数）を取得します。
      * @returns {{label: string, value: string}[]} - ファイルの詳細情報を格納したオブジェクトの配列。
      */
     TreeDataProvider.prototype.getFileDetails = function () {
@@ -78,6 +95,7 @@ var TreeDataProvider = /** @class */ (function () {
             var fileSize = this.formatFileSize(stats.size);
             var createdDate = stats.birthtime.toLocaleString();
             var modifiedDate = stats.mtime.toLocaleString();
+            var lineCount = this.countFileLines();
             this.cachedFileDetails = [
                 { label: 'File Name', value: fileName },
                 { label: 'File Path', value: filePath },
@@ -85,6 +103,12 @@ var TreeDataProvider = /** @class */ (function () {
                 { label: 'Created Date', value: createdDate },
                 { label: 'Modified Date', value: modifiedDate }
             ];
+            if (lineCount !== null) {
+                this.cachedFileDetails.push({ label: 'Line Count', value: lineCount.toString() });
+            }
+            else {
+                this.cachedFileDetails.push({ label: 'Line Count', value: 'Not applicable' });
+            }
         }
         catch (error) {
             // エラーが発生した場合はキャッシュを使用
